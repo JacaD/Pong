@@ -6,40 +6,40 @@ import java.util.Random
 
 class Ball(screenX: Int, screenY: Int) {
     val rect: RectF
-    private var mXVelocity: Float = 0f
-    private var mYVelocity: Float = 0f
-    private val mBallWidth: Float
-    private var mBallHeight: Float = 0f
+    private var xVelocity: Float = 0f
+    private var yVelocity: Float = 0f
+    private val ballWidth: Float
+    private var ballHeight: Float = 0f
 
     init {
-        mBallHeight = screenX / 75f
-        mBallWidth = mBallHeight
-        mXVelocity = -screenY / 2f
-        mYVelocity = mXVelocity
+        ballHeight = screenX / 75f
+        ballWidth = ballHeight
+        xVelocity = -screenY / 2f
+        yVelocity = xVelocity
         rect = RectF()
     }
 
     fun update(fps: Float) {
-        rect.left = rect.left + mXVelocity / fps
-        rect.top = rect.top + mYVelocity / fps
-        rect.right = rect.left + mBallWidth
-        rect.bottom = rect.top - mBallHeight
+        rect.left = rect.left + xVelocity / fps
+        rect.top = rect.top + yVelocity / fps
+        rect.right = rect.left + ballWidth
+        rect.bottom = rect.top - ballHeight
     }
 
     fun reverseYVelocity() {
-        mYVelocity = -mYVelocity
+        yVelocity = -yVelocity
     }
 
     fun reverseXVelocity() {
-        mXVelocity = -mXVelocity
+        xVelocity = -xVelocity
     }
 
     fun getXVelocity(): Float{
-        return mXVelocity
+        return xVelocity
     }
 
     fun getYVelocity(): Float{
-        return mYVelocity
+        return yVelocity
     }
 
     fun setRandomXVelocity() {
@@ -56,26 +56,26 @@ class Ball(screenX: Int, screenY: Int) {
     }
 
     fun increaseVelocity() {
-        mXVelocity += mXVelocity / 10
-        mYVelocity += mYVelocity / 10
+        xVelocity += xVelocity / 10
+        yVelocity += yVelocity / 10
     }
 
     fun clearObstacleY(y: Float, isAI: Boolean = true) {
         rect.bottom = y
-        rect.top = if(!isAI) y - mBallHeight else y + mBallHeight
+        rect.top = if(!isAI) y - ballHeight else y + ballHeight
     }
 
     fun clearObstacleX(x: Float) {
         rect.left = x
-        rect.right = x + mBallWidth
+        rect.right = x + ballWidth
     }
 
     fun reset(x: Int, y: Int) {
         rect.left = x / 2f
         rect.top = (y - 20).toFloat()
-        rect.right = x / 2f + mBallWidth
-        rect.bottom = y.toFloat() - 20f - mBallHeight
-        mXVelocity = -y / 2f
-        mYVelocity = mXVelocity
+        rect.right = x / 2f + ballWidth
+        rect.bottom = y.toFloat() - 20f - ballHeight
+        xVelocity = -y / 2f
+        yVelocity = xVelocity
     }
 }

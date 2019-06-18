@@ -2,41 +2,41 @@ package com.example.pongkotlin
 
 import android.graphics.RectF
 
-class Bat(private val mScreenX: Int,
-          private val mScreenY: Int,
+class Bat(private val screenX: Int,
+          private val screenY: Int,
           private val isAI: Boolean,
-          private val mLength: Float = mScreenX / 6.0f,
+          private val length: Float = screenX / 6.0f,
           private val speed: Float = 1.0f) {
 
     val rect: RectF
-//    private val mLength: Float = mScreenX / 6.0f
-    private val mHeight: Float = mScreenY / 25.0f
-    private var mXCoord: Float = 0f
-    private val mYCoord: Float
-    private var mBatSpeed: Float = 0f
-    private val mBatBaseSpeed: Float
-    private var mBatMoving = STOPPED
+//    private val length: Float = screenX / 6.0f
+    private val height: Float = screenY / 25.0f
+    private var xCoord: Float = 0f
+    private val yCoord: Float
+    private var batSpeed: Float = 0f
+    private val batBaseSpeed: Float
+    private var batMoving = STOPPED
 
     init {
 
-        mXCoord = mScreenX / 2.0f
-        mYCoord = if(isAI){
+        xCoord = screenX / 2.0f
+        yCoord = if(isAI){
             -10f
         } else{
-            (mScreenY - 30).toFloat()
+            (screenY - 30).toFloat()
         }
 
-        rect = RectF(mXCoord, mYCoord, mXCoord + mLength, mYCoord + mHeight)
-        mBatBaseSpeed = mScreenX / 2.0f
-        mBatSpeed = mScreenX / 2.0f
+        rect = RectF(xCoord, yCoord, xCoord + length, yCoord + height)
+        batBaseSpeed = screenX / 2.0f
+        batSpeed = screenX / 2.0f
     }
 
     fun setmBatSpeed(acceleratorValue: Double) {
-        mBatSpeed = mBatBaseSpeed * Math.abs(acceleratorValue).toFloat()
+        batSpeed = batBaseSpeed * Math.abs(acceleratorValue).toFloat()
     }
 
     fun setMovementState(state: Int) {
-        mBatMoving = state
+        batMoving = state
     }
 
     fun getCenter(): Float{
@@ -44,21 +44,21 @@ class Bat(private val mScreenX: Int,
     }
 
     fun update(fps: Float) {
-        if (mBatMoving == LEFT) {
-            mXCoord -= mBatSpeed / fps * speed
+        if (batMoving == LEFT) {
+            xCoord -= batSpeed / fps * speed
         }
 
-        if (mBatMoving == RIGHT) {
-            mXCoord += mBatSpeed / fps * speed
+        if (batMoving == RIGHT) {
+            xCoord += batSpeed / fps * speed
         }
         if (rect.left < 0) {
-            mXCoord = 0f
+            xCoord = 0f
         }
-        if (rect.right > mScreenX) {
-            mXCoord = mScreenX - (rect.right - rect.left)
+        if (rect.right > screenX) {
+            xCoord = screenX - (rect.right - rect.left)
         }
-        rect.left = mXCoord
-        rect.right = mXCoord + mLength
+        rect.left = xCoord
+        rect.right = xCoord + length
     }
     companion object {
         const val STOPPED = 0

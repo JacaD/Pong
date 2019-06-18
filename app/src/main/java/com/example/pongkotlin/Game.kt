@@ -20,29 +20,29 @@ import java.io.IOException
 
 import android.content.Context.SENSOR_SERVICE
 
-internal class Game(context: Context, var mScreenX: Int, var mScreenY: Int, mode: Int = 0) : SurfaceView(context), Runnable,
+internal class Game(context: Context, var screenX: Int, var screenY: Int, mode: Int = 0) : SurfaceView(context), Runnable,
     SensorEventListener {
 
-    private var mGameThread: Thread? = null
+    private var gameThread: Thread? = null
     @Volatile
-    var mPlaying: Boolean = false
-    private var mPaused = true
-    private lateinit var mCanvas: Canvas
-    private var mPaint: Paint
-    private var mFPS: Float = 0f
-    private var mBat: Bat
-    private var mBatAI: Bat
-    private var mBall: Ball
+    var playing: Boolean = false
+    private var paused = true
+    private lateinit var canvas: Canvas
+    private var paint: Paint
+    private var fps: Float = 0f
+    private var bat: Bat
+    private var batAI: Bat
+    private var ball: Ball
     private var sp: SoundPool
     private var beep1ID = -1
     private var beep2ID = -1
     private var beep3ID = -1
     private var loseLifeID = -1
     private var explodeID = -1
-    private var mScore = 0
-    private var mLives = 3
-    private val mSensorManager: SensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
-    private val mAccelerometer: Sensor
+    private var score = 0
+    private var lives = 3
+    private val sensorManager: SensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
+    private val accelerometer: Sensor
 
     init {
         var length = 0f
@@ -50,30 +50,30 @@ internal class Game(context: Context, var mScreenX: Int, var mScreenY: Int, mode
 
         when (mode) {
             EASY -> {
-                length = mScreenX / 15f
+                length = screenX / 15f
                 speed = 0.7f
             }
             NORMAL -> {
-                length = mScreenX / 10f
+                length = screenX / 10f
                 speed = 0.75f
             }
             HARD -> {
-                length = mScreenX / 8f
+                length = screenX / 8f
                 speed = 0.85f
             }
             DARK_SOULS -> {
-                length = mScreenX / 2f
+                length = screenX / 2f
                 speed = 20f
             }
         }
 
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-        mPaint = Paint()
+        paint = Paint()
 
-        mBat = Bat(mScreenX, mScreenY, false)
-        mBatAI = Bat(mScreenX, mScreenY, true, length, speed)
-        mBall = Ball(mScreenX, mScreenY)
+        bat = Bat(screenX, screenY, false)
+        batAI = Bat(screenX, screenY, true, length, speed)
+        ball = Ball(screenX, screenY)
 
 
         val audioAttributes = AudioAttributes.Builder()
@@ -113,116 +113,116 @@ internal class Game(context: Context, var mScreenX: Int, var mScreenY: Int, mode
     }
 
     private fun setupAndRestart() {
-        mBall.reset(mScreenX, mScreenY)
+        ball.reset(screenX, screenY)
 
-        if (mLives == 0) {
-            mScore = 0
-            mLives = 3
+        if (lives == 0) {
+            score = 0
+            lives = 3
         }
     }
 
     override fun run() {
-        while (mPlaying) {
+        while (playing) {
             val startFrameTime = System.currentTimeMillis()
-            if (!mPaused) {
+            if (!paused) {
                 update()
             }
             draw()
             val timeThisFrame = System.currentTimeMillis() - startFrameTime
             if (timeThisFrame >= 1) {
-                mFPS = 1000 / timeThisFrame.toFloat()
+                fps = 1000 / timeThisFrame.toFloat()
             }
         }
     }
 
     private fun update() {
 
-        mBat.update(mFPS)
-        mBall.update(mFPS)
-        mBatAI.update(mFPS * 1.6f)
+        bat.update(fps)
+        ball.update(fps)
+        batAI.update(fps * 1.6f)
 
-        if (RectF.intersects(mBat.rect, mBall.rect)) {
-            if(mBall.getXVelocity() > 0 && mBat.getCenter() > mBall.getCenter()){
-                mBall.reverseXVelocity()
+        if (RectF.intersects(bat.rect, ball.rect)) {
+            if(ball.getXVelocity() > 0 && bat.getCenter() > ball.getCenter()){
+                ball.reverseXVelocity()
             }
-            else if(mBall.getXVelocity() < 0 && mBat.getCenter() < mBall.getCenter()){
-                mBall.reverseXVelocity()
+            else if(ball.getXVelocity() < 0 && bat.getCenter() < ball.getCenter()){
+                ball.reverseXVelocity()
             }
-            mBall.reverseYVelocity()
-            mBall.clearObstacleY(mBat.rect.top - 5)
-//            mBall.increaseVelocity()
+            ball.reverseYVelocity()
+            ball.clearObstacleY(bat.rect.top - 5)
+//            ball.increaseVelocity()
             sp.play(beep1ID, 1f, 1f, 0, 0, 1f)
         }
 
-        if (RectF.intersects(mBatAI.rect, mBall.rect)) {
-            mBall.reverseYVelocity()
-            mBall.clearObstacleY(mBatAI.rect.bottom + 5, true)
-//            mBall.increaseVelocity()
+        if (RectF.intersects(batAI.rect, ball.rect)) {
+            ball.reverseYVelocity()
+            ball.clearObstacleY(batAI.rect.bottom + 5, true)
+//            ball.increaseVelocity()
             sp.play(beep1ID, 1f, 1f, 0, 0, 1f)
         }
 
-        if (mBall.rect.bottom > mScreenY) {
-            mBall.rect.bottom = mScreenY.toFloat()
-            mBall.reverseYVelocity()
-            mBall.clearObstacleY(mScreenY.toFloat() - 2)
-            mLives--
+        if (ball.rect.bottom > screenY) {
+            ball.rect.bottom = screenY.toFloat()
+            ball.reverseYVelocity()
+            ball.clearObstacleY(screenY.toFloat() - 2)
+            lives--
             sp.play(loseLifeID, 1f, 1f, 0, 0, 1f)
-            if (mLives == 0) {
-                mPaused = true
+            if (lives == 0) {
+                paused = true
                 setupAndRestart()
             }
         }
 
-        if (mBall.rect.top < 0) {
-            mBall.rect.top = 0f
-            mScore++
-            mBall.reverseYVelocity()
+        if (ball.rect.top < 0) {
+            ball.rect.top = 0f
+            score++
+            ball.reverseYVelocity()
             sp.play(beep2ID, 1f, 1f, 0, 0, 1f)
         }
 
-        if (mBall.rect.left < 0) {
-            mBall.rect.left = 0f
-            mBall.reverseXVelocity()
-            mBall.clearObstacleX(2f)
+        if (ball.rect.left < 0) {
+            ball.rect.left = 0f
+            ball.reverseXVelocity()
+            ball.clearObstacleX(2f)
             sp.play(beep3ID, 1f, 1f, 0, 0, 1f)
         }
 
-        if (mBall.rect.right > mScreenX) {
-            mBall.rect.right = mScreenX.toFloat()
-            mBall.reverseXVelocity()
-            mBall.clearObstacleX(mScreenX.toFloat() - 22)
+        if (ball.rect.right > screenX) {
+            ball.rect.right = screenX.toFloat()
+            ball.reverseXVelocity()
+            ball.clearObstacleX(screenX.toFloat() - 22)
             sp.play(beep3ID, 1f, 1f, 0, 0, 1f)
         }
 
         when {
-            mBall.getYVelocity() < 0 && mBatAI.getCenter() < mBall.getCenter() - 5 -> mBatAI.setMovementState(Bat.RIGHT)
-            mBall.getYVelocity() < 0 && mBatAI.getCenter() > mBall.getCenter() + 5 -> mBatAI.setMovementState(Bat.LEFT)
-            else -> mBatAI.setMovementState(Bat.STOPPED)
+            ball.getYVelocity() < 0 && batAI.getCenter() < ball.getCenter() - 5 -> batAI.setMovementState(Bat.RIGHT)
+            ball.getYVelocity() < 0 && batAI.getCenter() > ball.getCenter() + 5 -> batAI.setMovementState(Bat.LEFT)
+            else -> batAI.setMovementState(Bat.STOPPED)
         }
     }
 
     private fun draw() {
 
         if (holder.surface.isValid) {
-            mCanvas = holder.lockCanvas()
-            mCanvas.drawColor(Color.argb(255, 26, 128, 182))
-            mPaint.color = Color.argb(255, 255, 255, 255)
-            mCanvas.drawRect(mBat.rect, mPaint)
-            mCanvas.drawRect(mBall.rect, mPaint)
-            mCanvas.drawRect(mBatAI.rect, mPaint)
-            mPaint.color = Color.argb(255, 249, 129, 0)
-            mPaint.color = Color.argb(255, 255, 255, 255)
-            mPaint.textSize = 40f
-            mCanvas.drawText("Score: $mScore   Lives: $mLives", 10f, 100f, mPaint)
-            holder.unlockCanvasAndPost(mCanvas)
+            canvas = holder.lockCanvas()
+            canvas.drawColor(Color.argb(255, 26, 128, 182))
+            paint.color = Color.argb(255, 255, 255, 255)
+            canvas.drawRect(bat.rect, paint)
+            canvas.drawRect(ball.rect, paint)
+            canvas.drawRect(batAI.rect, paint)
+            paint.color = Color.argb(255, 249, 129, 0)
+            paint.color = Color.argb(255, 255, 255, 255)
+            paint.textSize = 40f
+            canvas.drawText("Score: $score   Lives: $lives", 10f, 100f, paint)
+            holder.unlockCanvasAndPost(canvas)
         }
     }
 
     fun pause() {
-        mSensorManager.unregisterListener(this)
-        mPlaying = false
+        sensorManager.unregisterListener(this)
+        playing = false
         try {
-            mGameThread!!.join()
+            gameThread!!.join()
         } catch (e: InterruptedException) {
             Log.e("Error:", "joining thread")
         }
@@ -230,16 +230,16 @@ internal class Game(context: Context, var mScreenX: Int, var mScreenY: Int, mode
     }
 
     fun resume() {
-        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL)
-        mPlaying = true
-        mGameThread = Thread(this)
-        mGameThread!!.start()
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        playing = true
+        gameThread = Thread(this)
+        gameThread!!.start()
     }
 
 
     override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
-        mPaused = !mPaused
-//        mPaused = false
+        paused = !paused
+//        paused = false
         return true
     }
 
@@ -247,14 +247,14 @@ internal class Game(context: Context, var mScreenX: Int, var mScreenY: Int, mode
         val tilt = event.values[1].toDouble()
         when {
             tilt > 0.5 -> {
-                mBat.setMovementState(Bat.RIGHT)
-                mBat.setmBatSpeed(tilt)
+                bat.setMovementState(Bat.RIGHT)
+                bat.setmBatSpeed(tilt)
             }
             tilt < -0.5 -> {
-                mBat.setMovementState(Bat.LEFT)
-                mBat.setmBatSpeed(tilt)
+                bat.setMovementState(Bat.LEFT)
+                bat.setmBatSpeed(tilt)
             }
-            else -> mBat.setMovementState(Bat.STOPPED)
+            else -> bat.setMovementState(Bat.STOPPED)
         }
     }
 
